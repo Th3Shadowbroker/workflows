@@ -1,0 +1,75 @@
+name: Go
+description: A workflow for the Go programming language.
+
+on:
+    workflow_call: 
+        inputs:
+            run_build:
+                description: |
+                    Whether the build step should be executed.
+                    Default: true
+                type: boolean
+                required: false
+                default: true
+            run_test: 
+                description: |
+                    Whether the test step should be executed.
+                    Default: true
+                type: boolean
+                required: false
+                default: true
+            allow_test_failure:
+                description: |
+                    Whether the workflow should fail if the test step fails.
+                    Default: false
+                type: boolean
+                required: false
+                default: false
+            go_version:
+                description: |
+                    The Go version that should be used.
+                    Default: 1.24
+                type: string
+                required: false
+                default: '1.24'
+
+jobs:
+   build:
+    name:  Go build
+    runs-on: ubuntu:latest
+    steps:
+        - name: Checkout code
+          id: checkout
+          uses: actions/checkout@v4
+
+        - name: Set up Go
+          uses: actions/setup-go@v5
+          with:
+            go-version: ${{ inputs.go_version }}
+
+        - name: Download dependencies
+          id: deps-download
+          run: |
+            go mod download
+
+        - name: Verify dependencies
+          id: deps-verify
+          run: |
+            go mod verify
+
+        - name: Run tests
+          id: test
+          if: ${{ inputs.run_test }}
+          continue-on-error: ${{ inputs.allow_test_failure }}
+          run: |
+            go test ./...
+
+        - name: Build binary
+          id: build
+          if: ${{ inputs.run_build }}
+          run: |
+            go build .
+
+        
+
+  
