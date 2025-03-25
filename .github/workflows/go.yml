@@ -25,6 +25,12 @@ on:
                 type: boolean
                 required: false
                 default: false
+            test_args:
+                description: |
+                    Arguments that should be passed to the go test command.
+                type: string
+                required: false
+                default: ""
             go_version:
                 description: |
                     The Go version that should be used.
@@ -70,7 +76,7 @@ jobs:
           if: ${{ inputs.run_test }}
           continue-on-error: ${{ inputs.allow_test_failure }}
           run: |
-            go test ./...
+            go test ./... ${{ inputs.test_args }}
 
         - name: Build binary
           id: build
